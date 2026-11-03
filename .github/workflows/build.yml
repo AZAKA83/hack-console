@@ -1,0 +1,37 @@
+﻿name: Build Hack Console
+
+on:
+  push:
+    branches:
+      - "**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: Win64
+            os: windows-latest
+          - target: Android64
+            os: ubuntu-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build Hack Console
+        id: build
+        uses: geode-sdk/build-geode-mod@main
+        with:
+          sdk: given
+          target: ${{ matrix.target }}
+
+      - name: Upload mod
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hack-Console-${{ matrix.target }}
+          path: ${{ steps.build.outputs.build-output }}/*.geode
+          if-no-files-found: error
